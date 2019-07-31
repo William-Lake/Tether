@@ -8,16 +8,16 @@ Relies on [py-trello](https://github.com/sarumont/py-trello) and [PyGithub](http
 1. Find any new Trello Cards that don't have a Github Issue with the same title.
 2. Find any Github Issues that don't have a Trello Card with the same name.
 3. For each new Trello Card, create a new Github Issue.
-  a. If the Trello Card contains Labels not in the Github Repo, they are created during this step.
+  * If the Trello Card contains Labels not in the Github Repo, they are created during this step. 
 4. Close each Github issue that doesn't have an equivalent Trello Card.
 5. Match up Trello Cards and Github Issues with the same Name/Title.
 6. For each pair,
-  a. Address the Labels
-    i. If the Trello Card contains Labels not in the Github Repo, create them in the Github Repo.
-    ii. Remove Labels from the Github Issue that aren't on the Trello Card.
-  c. Address the Comments
-    i. Find all the comments on the Trello Card not on the Github Issue. Add the comments to the Github Issue.
-    ii. Find all the comments on the Github Issue not on the Trello Card. Add the comments to the Trello Card.
+  * Address the Labels
+    * If the Trello Card contains Labels not in the Github Repo, create them in the Github Repo.
+    * Remove Labels from the Github Issue that aren't on the Trello Card.
+  * Address the Comments
+    * Find all the comments on the Trello Card not on the Github Issue. Add the comments to the Github Issue.
+    * Find all the comments on the Github Issue not on the Trello Card. Add the comments to the Trello Card.
     
 ## Usage
 
