@@ -31,7 +31,7 @@ pip install -r requirements.txt
 3. Execute main.py, passing in the required arguments.
 
 ```bash
-python main.py GithubRepoName TrelloBoardName trello.json INFO
+python main.py GithubRepoName "TrelloBoard With Spaces In Name" trello.json INFO
 ```
 
 ### Help
