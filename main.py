@@ -18,9 +18,11 @@ def load_json(trello_json_file):
 
     try:
 
-        trello_json = json.loads(open('trello_json_file','r').read())
+        trello_json = json.loads(open(trello_json_file,'r').read())
 
-    except:
+    except Exception as e:
+
+        logging.error(str(e))
 
         log_and_exit(f'Unable to load json file at {trello_json_file}!')
 
@@ -78,7 +80,7 @@ if __name__ == "__main__":
 
     migration_util.address_new_cards_old_issues()
 
-    migration_util.compare_cards_issues(trello_util,github_util)
+    migration_util.compare_cards_issues()
 
 
 

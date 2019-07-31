@@ -11,9 +11,9 @@ class MigrationUtil(object):
 
     def address_new_cards_old_issues(self):
 
-        gather_new_cards_stale_issues(trello_util,github_util)
+        self.gather_new_cards_stale_issues()
         
-        migrate_cards_delete_issues(new_card_names,stale_issue_titles)
+        self.migrate_cards_delete_issues()
 
     def gather_new_cards_stale_issues(self):
 
