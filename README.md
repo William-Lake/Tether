@@ -1,5 +1,6 @@
-# TrelloGithubUpdater
-Updates the issues in a Github Repo with the cards in a Trello Board.
+# Tether
+
+*T*r*E*llo gi*TH*ub updat*ER*
 
 Relies on [py-trello](https://github.com/sarumont/py-trello) and [PyGithub](https://github.com/PyGithub/PyGithub)
 
