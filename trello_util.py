@@ -39,6 +39,8 @@ class TrelloUtil(object):
 
         self.label_colors = ['green','yellow','orange','red','purple','blue','sky','lime','pink','black']
 
+        self.done_list = None
+
     def get_board_label_by_name(self,label_name):
 
         logging.info('Gathering board label by name')
@@ -82,6 +84,30 @@ class TrelloUtil(object):
                 new_labels.append(self.create_label(issue_label.name))
 
         return new_labels
+
+    def get_card_by_name(self,card_name):
+
+        return [
+            card
+            for card
+            in self.cards
+            if card.name == card_name
+        ][0]
+
+    def move_card_to_done(self,card):
+
+        if self.done_list is None:
+
+            self.done_list = [
+                board_list
+                for board_list
+                in self.target_board.all_lists()
+                if board_list.name == 'Done'
+            ][0]
+
+        moved_card = self.done_list.add_card(card.name,source=card.id)
+
+        card.delete()
 
     # Not used at the moment, but used when going from Github to Trello.
     # def organize_lists(self):

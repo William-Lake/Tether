@@ -78,10 +78,6 @@ if __name__ == "__main__":
 
     migration_util = MigrationUtil(trello_util,github_util)
 
-    migration_util.address_new_cards_old_issues()
+    migration_util.migrate()
 
     migration_util.compare_cards_issues()
-
-
-
-        

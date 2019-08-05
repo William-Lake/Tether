@@ -26,7 +26,21 @@ class GithubUtil(object):
 
             exit(1)
 
-        self.issues = self.target_repo.get_issues(state='all')
+        issues = self.target_repo.get_issues(state='all')
+
+        self.open_issues = [
+            issue
+            for issue
+            in issues
+            if issue.state == 'open'
+        ]
+
+        self.closed_issues = [
+            issue
+            for issue
+            in issues
+            if issue.state == 'closed'
+        ]
 
     def gather_username(self):
 
@@ -117,6 +131,16 @@ class GithubUtil(object):
         else:
 
             logging.info('Card has no labels')
+
+    def get_issue_by_title(self,issue_title):
+
+        for issue in self.open_issues:
+
+            if issue.title == issue_title:
+
+                return issue
+
+        return None
 
     @staticmethod
     def is_issue_in_progress(issue):

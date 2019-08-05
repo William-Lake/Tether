@@ -9,15 +9,24 @@ class MigrationUtil(object):
 
         self.github_util = github_util
 
-    def address_new_cards_old_issues(self):
+    def migrate(self):
 
-        self.gather_new_cards_stale_issues()
+        self.identify_changes()
         
-        self.migrate_cards_delete_issues()
+        self.apply_changes()
 
-    def gather_new_cards_stale_issues(self):
+    def identify_changes(self):
 
         logging.info('Determining cards to migrate and issues to delete')
+
+        '''
+        If a card is in Trello and not in Github
+            If there's an equivalent github issue that's been closed
+                Make the comparisons re: labels/comments
+                Move the card to the "Done" list
+            Else
+                Make the github issue
+        '''
 
         card_names = [
             card.name
@@ -25,66 +34,84 @@ class MigrationUtil(object):
             in self.trello_util.cards
         ]
 
-        issue_titles = [
+        open_issue_titles = [
             issue.title
             for issue
-            in self.github_util.issues
+            in self.github_util.open_issues
         ]
 
-        self.new_card_names = list(set(card_names) - set(issue_titles))
+        closed_issue_titles = [
+            issue.title
+            for issue
+            in self.github_util.closed_issues
+        ]
 
-        self.stale_issue_titles = list(set(issue_titles) - set(card_names))
+        # Cards in trello not in github's open issues
+        self.names_of_cards_to_create = list(set(card_names) - set(open_issue_titles))
 
-    def migrate_cards_delete_issues(self):
+        # Issues closed in github in and in Trello
+        self.names_of_cards_to_move_to_done = [
+            card
+            for card
+            in list(set(closed_issue_titles) & set(card_names))
+        ]
 
-        if self.new_card_names or self.stale_issue_titles:
+        # TODO May be able to improve this.
+        self.names_of_cards_to_create = [
+            card_name
+            for card_name
+            in self.names_of_cards_to_create
+            if card_name not in self.names_of_cards_to_move_to_done
+        ]
 
-            logging.info(f'{len(self.new_card_names)} cards to migrate and {len(self.stale_issue_titles)} issues to close')
+        # Open Issues in github, not in Trello
+        self.titles_of_issues_to_close = list(set(open_issue_titles) - set(card_names))
 
-            cards_to_migrate = [
-                card
-                for card
-                in self.trello_util.cards
-                if card.name in self.new_card_names
-            ]
+    def apply_changes(self):
 
-            issues_to_delete = [
-                issue
-                for issue
-                in self.github_util.issues
-                if issue.title in self.stale_issue_titles
-            ]
+        if self.names_of_cards_to_create:
 
-            if cards_to_migrate:
+            logging.info(f'{len(self.names_of_cards_to_create)} cards to create in Github')
 
-                logging.info('Migrating new cards to github')
+            for card_name in self.names_of_cards_to_create:
 
-                for card in cards_to_migrate:
+                card = self.trello_util.get_card_by_name(card_name)
 
-                    logging.info(f'Migrated card: {card.name}')
+                logging.info(f'Migrated card: {card.name}')
 
-                    self.github_util.add_new_issue(card)
+                self.github_util.add_new_issue(card)
 
+        if self.names_of_cards_to_move_to_done:
 
-            if issues_to_delete:
+            logging.info(f'{len(self.names_of_cards_to_move_to_done)} cards to move to "Done"')
 
-                logging.info('Deleting stale issues from github')
+            for card_name in self.names_of_cards_to_move_to_done:
 
-                for issue in issues_to_delete:
+                card = self.trello_util.get_card_by_name(card_name)
 
-                    logging.info(f'Closed issue: {issue.title}')
+                if card.get_list().name == 'To Do':
 
-                    issue.edit(state='closed')
+                    logging.info(f'Moved card: {card.name}')
 
-        else:
+                    self.trello_util.move_card_to_done(card)
 
-            logging.info('No new cards to migrate or issues to close.')
+        if self.titles_of_issues_to_close:
+
+            logging.info(f'{len(self.titles_of_issues_to_close)} issues in Github to close')
+
+            for issue_title in self.titles_of_issues_to_close:
+
+                issue = self.github_util.get_issue_by_title(issue_title)
+
+                logging.info(f'Closed issue: {issue.title}')
+
+                issue.edit(state='closed')
 
     def compare_cards_issues(self):
 
         for card in self.trello_util.cards:
 
-            for issue in self.github_util.issues:
+            for issue in self.github_util.open_issues:
 
                 if card.name.upper().strip() == issue.title.upper().strip():
 
