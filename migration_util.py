@@ -51,8 +51,8 @@ class MigrationUtil(object):
 
         # Issues closed in github in and in Trello
         self.names_of_cards_to_move_to_done = [
-            card
-            for card
+            card_name
+            for card_name
             in list(set(closed_issue_titles) & set(card_names))
         ]
 
@@ -89,7 +89,7 @@ class MigrationUtil(object):
 
                 card = self.trello_util.get_card_by_name(card_name)
 
-                if card.get_list().name == 'To Do':
+                if card.get_list().name != 'Done':
 
                     logging.info(f'Moved card: {card.name}')
 
@@ -231,6 +231,12 @@ class MigrationUtil(object):
         if labels_to_remove or labels_to_add:
 
             logging.info('Making changes to issue labels')
+
+            new_issue_labels = [
+                label.name
+                for label
+                in new_issue_labels
+            ]
 
             issue.edit(labels=new_issue_labels)
 

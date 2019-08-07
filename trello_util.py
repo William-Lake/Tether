@@ -47,7 +47,7 @@ class TrelloUtil(object):
 
         for board_label in self.target_board.get_labels():
 
-            if board_label.name == label_name:
+            if board_label.name.upper() == label_name.upper():
 
                 return board_label
 

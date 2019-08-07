@@ -78,7 +78,7 @@ class GithubUtil(object):
 
             if repo_label is None:
 
-                repo_label = self.create_label(card_label.name)
+                repo_label = self.create_label(card_label)
 
             issue_labels.append(repo_label)
 
@@ -90,7 +90,7 @@ class GithubUtil(object):
 
         for repo_label in self.target_repo.get_labels():
 
-            if repo_label.name == label_name:
+            if repo_label.name.upper() == label_name.upper():
 
                 return repo_label
 
@@ -114,7 +114,13 @@ class GithubUtil(object):
 
         for comment in card.get_comments():
 
-            new_issue.create_comment(comment)
+            try:
+
+                new_issue.create_comment(comment)
+            
+            except:
+
+                logging.error('Error while trying to copy comment!')
 
     def create_labels_not_existing(self,card):
 
