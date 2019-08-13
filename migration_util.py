@@ -71,7 +71,7 @@ class MigrationUtil(object):
 
         if self.names_of_cards_to_create:
 
-            logging.info(f'{len(self.names_of_cards_to_create)} cards to create in Github')
+            logging.info(f'{len(self.names_of_cards_to_create)} issues to create in Github')
 
             for card_name in self.names_of_cards_to_create:
 
@@ -108,6 +108,8 @@ class MigrationUtil(object):
                 issue.edit(state='closed')
 
     def compare_cards_issues(self):
+
+        logging.info('Comparing cards and issues')
 
         for card in self.trello_util.cards:
 
