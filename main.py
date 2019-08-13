@@ -5,7 +5,8 @@ import logging
 import random
 
 from github_util import GithubUtil
-from migration_util import MigrationUtil
+from trello_to_github_util import TrelloToGithubUtil
+from github_to_trello_util import GithubToTrelloUtil
 from trello_util import TrelloUtil
 
 def log_and_exit(message):
@@ -46,13 +47,15 @@ def gather_args():
 
     arg_parser.add_argument('trello_board',help='The name of the Trello board you want to migrate from.')
 
+    arg_parser.add_argument('--from_github',action='store_true',help='Use if you want to migrate issues from github to trello.')
+
     arg_parser.add_argument('trello_json_file',help='A json file containing the info required for logging into your Trello account.')
 
     arg_parser.add_argument('log_level',nargs='?',choices=['NOTSET','DEBUG','INFO','WARNING','ERROR','CRITICAL'],default='INFO',help='The level of logging/output this process should provide.')
 
     args = arg_parser.parse_args()
 
-    return args.github_repo, args.trello_board, args.trello_json_file, args.log_level
+    return args.github_repo, args.trello_board, args.from_github, args.trello_json_file, args.log_level
 
 if __name__ == "__main__":
 
@@ -66,7 +69,7 @@ if __name__ == "__main__":
         'CRITICAL':50
     }
 
-    github_repo, trello_board, trello_json_file, log_level = gather_args()
+    github_repo, trello_board, move_from_github, trello_json_file, log_level = gather_args()
 
     logging.basicConfig(level=logging_level_value_dict[log_level])
 
@@ -76,8 +79,20 @@ if __name__ == "__main__":
 
     trello_util = TrelloUtil(trello_json, trello_board)
 
-    migration_util = MigrationUtil(trello_util,github_util)
+    if not move_from_github:
 
-    migration_util.migrate()
+        logging.info('Migrating from Trello to Github')
 
-    migration_util.compare_cards_issues()
+        trello_to_github_util = TrelloToGithubUtil(trello_util,github_util)
+
+        trello_to_github_util.migrate()
+
+        trello_to_github_util.compare_cards_issues()
+
+    else:
+
+        logging.info('Migrating from Github to Trello')
+
+        github_to_trello_util = GithubToTrelloUtil(trello_util,github_util)
+
+        github_to_trello_util.migrate()

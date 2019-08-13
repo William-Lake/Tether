@@ -1,7 +1,7 @@
 import logging
 
 
-class MigrationUtil(object):
+class TrelloToGithubUtil(object):
 
     def __init__(self,trello_util,github_util):
 

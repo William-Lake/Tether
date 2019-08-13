@@ -57,7 +57,7 @@ class TrelloUtil(object):
 
         label_color = random.choice(self.label_colors)
 
-        return self.target_board.add_label(issue_label.name,label_color)
+        return self.target_board.add_label(label_name,label_color)
 
     def copy_comments(self,issue,new_card):
 
@@ -87,12 +87,44 @@ class TrelloUtil(object):
 
     def get_card_by_name(self,card_name):
 
-        return [
+        target_cards = [
             card
             for card
             in self.cards
             if card.name == card_name
-        ][0]
+        ]
+
+        if target_cards:
+
+            return target_cards[0]
+
+        else:
+
+            return None
+
+    def card_with_name_exists(self,card_name):
+
+        logging.info(f'Checking if card named "{card_name}" already exists.')
+
+        if self.get_card_by_name(card_name) is None:
+
+            target_cards = [
+                card
+                for card
+                in self.target_board.closed_cards()
+                if card.name == card_name
+            ]
+
+            if target_cards:
+
+                return True
+
+            else:
+
+                return False
+
+        return True
+
 
     def move_card_to_done(self,card):
 
@@ -109,74 +141,47 @@ class TrelloUtil(object):
 
         card.delete()
 
-    # Not used at the moment, but used when going from Github to Trello.
-    # def organize_lists(self):
+    def get_trello_labels_for_issue(self,issue):
 
-    #     logging.info('Organizing Lists')
+        labels = [
+            self.get_board_label_by_name(issue_label.name)
+            for issue_label
+            in issue.labels
+        ]
 
-    #     for this_list in self.target_board.all_lists():
+        return labels
 
-    #         if this_list.name == 'To Do':
+    def create_card_for_issue_in_list(self,issue,list_name):
 
-    #             self.todo_list = this_list
+        logging.info(f'Creating new card for issue "{issue.title}"')
 
-    #         elif this_list.name == 'Doing':
+        self.create_labels_not_existing(issue)
 
-    #             self.doing_list = this_list
+        card_labels = self.get_trello_labels_for_issue(issue)
 
-    #         elif this_list.name == 'Done':
+        target_list = self.get_list_by_name(list_name)
 
-    #             self.done_list = this_list
+        new_card = target_list.add_card(name=issue.title, labels=card_labels)
 
-    # Not used at the moment, but used when going from Github to Trello.
-    # def add_new_card(self,issue):
+        self.copy_comments(issue,new_card)
 
-    #     logging.info('Adding new card')
+    def get_list_by_name(self,list_name):
 
-    #     target_list = self.determine_list_for_issue(issue)
+        logging.info(f'Gathering list named {list_name}')
 
-    #     new_card_labels = self.determine_new_card_labels_for_issue(issue)
+        target_lists = [
+            trello_list
+            for trello_list
+            in self.target_board.all_lists()
+            if trello_list.name == list_name
+        ]
 
-    #     new_card = target_list.add_card(name=issue.title, labels=new_card_labels)
+        if target_lists:
 
-    #     self.copy_comments(issue,new_card)
+            return target_lists[0]
 
-    # Not used at the moment, but used when going from Github to Trello.
-    # def determine_list_for_issue(self,issue):
+        else:
 
-    #     logging.info('Determining list for issue')
+            logging.error(f'Unable to find list named {list_name}!')
 
-    #     target_list = None
-
-    #     if issue.state == 'closed':
-
-    #         target_list = self.done_list
-
-    #     elif GithubUtil.is_issue_in_progress(issue):
-
-    #         target_list = self.doing_list
-
-    #     else:
-
-    #         target_list = self.todo_list
-
-    #     return target_list
-
-    # Not used at the moment, but used when going from Github to Trello.
-    # def determine_new_card_labels_for_issue(self,issue):
-
-    #     logging.info('Determining card labels for issue')
-
-    #     card_labels = []
-
-    #     for issue_label in issue.labels:
-
-    #         board_label = self.get_board_label_by_name(issue_label.name)
-
-    #         if board_label is None:
-
-    #             self.create_label(issue_label.name)
-
-    #         card_labels.append(board_label)
-
-    #     return card_labels
+            exit(1)
