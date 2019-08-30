@@ -72,15 +72,17 @@ class GithubUtil(object):
 
         issue_labels = []
 
-        for card_label in card.labels:
+        if card.labels:
 
-            repo_label = self.get_repo_label_by_name(card_label.name)
+            for card_label in card.labels:
 
-            if repo_label is None:
+                repo_label = self.get_repo_label_by_name(card_label.name)
 
-                repo_label = self.create_label(card_label)
+                if repo_label is None:
 
-            issue_labels.append(repo_label)
+                    repo_label = self.create_label(card_label)
+
+                issue_labels.append(repo_label)
 
         return issue_labels
 
@@ -102,7 +104,7 @@ class GithubUtil(object):
 
         random_color_num_func = lambda: random.randint(0,255)
 
-        label_color = f'#{random_color_num_func():02x}{random_color_num_func():02x}{random_color_num_func():02x}'
+        label_color = f'{random_color_num_func():02x}{random_color_num_func():02x}{random_color_num_func():02x}'
 
         logging.info(f'New label color is {label_color}')
 

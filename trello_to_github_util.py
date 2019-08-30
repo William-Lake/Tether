@@ -50,7 +50,7 @@ class TrelloToGithubUtil(object):
         self.names_of_cards_to_create = list(set(card_names) - set(open_issue_titles))
 
         # Issues closed in github in and in Trello
-        self.names_of_cards_to_move_to_done = [
+        self.cards_to_move_to_done = [
             card_name
             for card_name
             in list(set(closed_issue_titles) & set(card_names))
@@ -61,11 +61,24 @@ class TrelloToGithubUtil(object):
             card_name
             for card_name
             in self.names_of_cards_to_create
-            if card_name not in self.names_of_cards_to_move_to_done
+            if card_name not in self.cards_to_move_to_done
         ]
 
         # Open Issues in github, not in Trello
         self.titles_of_issues_to_close = list(set(open_issue_titles) - set(card_names))
+
+        self.cards_to_move_to_done = [
+            self.trello_util.get_card_by_name(card_name)
+            for card_name
+            in self.cards_to_move_to_done
+        ]
+
+        self.cards_to_move_to_done = [
+            card
+            for card
+            in self.cards_to_move_to_done
+            if card.get_list().name != 'Done'
+        ]
 
     def apply_changes(self):
 
@@ -81,19 +94,15 @@ class TrelloToGithubUtil(object):
 
                 self.github_util.add_new_issue(card)
 
-        if self.names_of_cards_to_move_to_done:
+        if self.cards_to_move_to_done:
 
-            logging.info(f'{len(self.names_of_cards_to_move_to_done)} cards to move to "Done"')
+            logging.info(f'{len(self.cards_to_move_to_done)} cards to move to "Done"')
 
-            for card_name in self.names_of_cards_to_move_to_done:
+            for card in self.cards_to_move_to_done:
 
-                card = self.trello_util.get_card_by_name(card_name)
+                logging.info(f'Moved card: {card.name}')
 
-                if card.get_list().name != 'Done':
-
-                    logging.info(f'Moved card: {card.name}')
-
-                    self.trello_util.move_card_to_done(card)
+                self.trello_util.move_card_to_done(card)
 
         if self.titles_of_issues_to_close:
 
